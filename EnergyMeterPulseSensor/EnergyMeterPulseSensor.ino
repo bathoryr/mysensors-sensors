@@ -30,12 +30,11 @@ volatile unsigned long watt = 0L;
 unsigned long oldPulseCountHI = 0L;   
 unsigned long oldPulseCountLO = 0L;   
 unsigned long oldWatt = 0L;
-//double oldKwh;
 
 volatile bool HDOState;
 bool LastHDOState;
 
-MyMessage wattMsg(CHILD_ID_POWER_HI,V_WATT);    // Current consumption is only one
+MyMessage wattMsg(CHILD_ID_POWER_HI,V_WATT);    // Instant consumption is only one
 MyMessage pcMsgHI(CHILD_ID_POWER_PULSE,V_VAR1);
 MyMessage pcMsgLO(CHILD_ID_POWER_PULSE,V_VAR2);
 MyMessage HDOmsg(CHILD_ID_POWER_HDO, V_TRIPPED);
@@ -76,7 +75,7 @@ void loop()
   loop60s();  // Send HDO status and power meter data regularly
 }
 
-// Every 15s send power values
+// Every 15s send instant consumption value
 unsigned long timerPower = 0L;
 void loop15s()
 {
@@ -84,23 +83,18 @@ void loop15s()
     timerPower = millis();
     // New watt value has been calculated  
     if (watt != oldWatt) {
-      SendWatt();
+      // Check that we dont get unresonable large watt value. 
+      // could hapen when long wraps or false interrupt triggered
+      if (watt < ((unsigned long)MAX_WATT)) {
+        send(wattMsg.set(watt));
+      }  
+    #ifdef MY_DEBUG
+      Serial.print("Watt:");
+      Serial.println(watt);
+    #endif
+      oldWatt = watt;  
     }
   }
-}
-
-void SendWatt()
-{
-  // Check that we dont get unresonable large watt value. 
-  // could hapen when long wraps or false interrupt triggered
-  if (watt < ((unsigned long)MAX_WATT)) {
-    send(wattMsg.set(watt));  // Send watt value to gw 
-  }  
-#ifdef MY_DEBUG
-  Serial.print("Watt:");
-  Serial.println(watt);
-#endif
-  oldWatt = watt;  
 }
 
 unsigned int kwhCounter = 0;   // Counter for sendig kwh value once per 5 cycles (minutes)
@@ -122,11 +116,11 @@ void SendPulse()
   if (pcReceivedLO) {
     if (pulseCountLO != oldPulseCountLO) {
       oldPulseCountLO = pulseCountLO;
-      send(pcMsgLO.set(pulseCountLO));  // Send pulse count value to gw 
+      send(pcMsgLO.set(pulseCountLO));  // Send pulse count value
       if (kwhCounter % 5 == 0) {
         MyMessage kwhMsgLO(CHILD_ID_POWER_LO,V_KWH);
         double kwh = (double)pulseCountLO / (double)PULSE_FACTOR;     
-        send(kwhMsgLO.set(kwh, 4));  // Send kwh value to gw
+        send(kwhMsgLO.set(kwh, 4));  // Send kwh value
       }
     }
   } else {
@@ -146,7 +140,6 @@ void loop60s()
     // Send HDO state
     readHDOState();
     send(HDOmsg.set(HDOState) );
-    // LastHDOState = HDOState;
   }
 }
 
@@ -154,14 +147,18 @@ void receive(const MyMessage &message) {
   if (message.sensor == CHILD_ID_POWER_PULSE) {
     if (message.type == V_VAR1) {
       pulseCountHI = oldPulseCountHI = message.getLong();
+    #ifdef MY_DEBUG
       Serial.print("Received last HI pulse count from gw:");
       Serial.println(pulseCountHI);
+    #endif
       pcReceivedHI = true;
     }
     if (message.type == V_VAR2) {
       pulseCountLO = oldPulseCountLO = message.getLong();
+    #ifdef MY_DEBUG
       Serial.print("Received last LO pulse count from gw:");
       Serial.println(pulseCountLO);
+    #endif
       pcReceivedLO = true;
     }
   }
