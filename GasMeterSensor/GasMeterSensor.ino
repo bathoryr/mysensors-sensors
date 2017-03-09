@@ -1,8 +1,19 @@
-//#define MY_DEBUG
+/* Gas meter pulse sensor - read pulses from gas meter and send pulse count and current cinsuption in dm3 (litre)
+ *  On satartup, requests initial value of counter from controller - V_WATT message type.
+ *  It is battery powered, so it goes to sleep when no pulse received after 2 minutes. Wakes up on next pulse and sends 
+ *  current consumption every 15 seconds.
+ *  In debug mode flash LED every pulse detected.
+ *  
+ *  Mounting pulse sensor on Gas meter:
+ *  Place reed switch close to last digit on the mechanical counter. There is little magnet on disc in nuber 6 or 0.
+ *  
+ *  CONFIG: MYS bootloader, internal clock 8MHz.
+ */
+
+#define MY_DEBUG
 #define MY_RADIO_NRF24
 #include <MySensors.h>
 
-#define ulong unsigned long
 #define GAS_SENSOR_PIN  2
 #define LED_COUNTER_PIN 6
 
@@ -11,7 +22,7 @@
 MyMessage msgPulseCount(CHILD_ID_PULSE_COUNTER, V_WATT);
 MyMessage msgLitrePM(CHILD_ID_PULSE_COUNTER, V_KWH);
 
-volatile unsigned long pulseCounter = 0ul;   // volatile if used in ISR
+volatile unsigned long pulseCounter = 0ul;
 unsigned long lastPulseTime = millis();
 float litresPerMinute;
 unsigned long lastPC = 0ul;
@@ -20,6 +31,7 @@ bool countReceived = false;
 
 void setup()
 {
+    analogReference(INTERNAL);
     request(CHILD_ID_PULSE_COUNTER, V_WATT);
     pinMode(LED_COUNTER_PIN, OUTPUT);
     digitalWrite(LED_COUNTER_PIN, HIGH);
@@ -29,25 +41,27 @@ void setup()
     pinMode(GAS_SENSOR_PIN, INPUT);
     INT_PIN = digitalPinToInterrupt(GAS_SENSOR_PIN);
     attachInterrupt(INT_PIN, onPulse, RISING);
+    checkBattery();
 }
 
 void presentation()
 {
-    sendSketchInfo("Gas meter sensor", "0.4");
+    sendSketchInfo("Gas meter sensor", "1.0");
     present(CHILD_ID_PULSE_COUNTER, S_POWER, "Pulse count");
     present(CHILD_ID_VOLTAGE, S_MULTIMETER, "Battery voltage");
 }
 
 void loop()
 {
- #ifdef MY_DEBUG
-  loop50ms();
- #endif
+  #ifdef MY_DEBUG
+    loop50ms();
+  #endif
   loop15s();
   loop2m();
 }
 
 #ifdef MY_DEBUG
+In debug mode, flash LED every incoming pulse
 unsigned long timer50ms = 0ul;
 void loop50ms()
 {
@@ -82,24 +96,24 @@ void loop2m()
     if (lastPC == pulseCounter) {
       litresPerMinute = 0;
       send(msgLitrePM.set(litresPerMinute, 2));
-     #ifdef MY_DEBUG
-      Serial.println("No pulse chage for 2 min, going to sleep");
-     #endif
+      #ifdef MY_DEBUG
+        Serial.println("No pulse chage for 2 min, going to sleep");
+      #endif
       if (smartSleep(INT_PIN, RISING, 300000) < 0) {
         // No event received, sleep immediately again - no timer reset
         checkBattery();
-       #ifdef MY_DEBUG
-        Serial.println("Wake up after 5 min");
-       #endif
+        #ifdef MY_DEBUG
+          Serial.println("Wake up after 5 min");
+        #endif
       } else {
         // Event received, this fisrt is not handled by interrupt routine - increase counter here
         pulseCounter++;
         lastPulseTime = millis();
         attachInterrupt(INT_PIN, onPulse, RISING);
         timer2m = millis();
-       #ifdef MY_DEBUG
-        Serial.println("Wake up by pin status change");
-       #endif
+        #ifdef MY_DEBUG
+          Serial.println("Wake up by pin status change");
+        #endif
       }
     } else {
       // Pulse counter has been changed by ISR, wait another 2 min
@@ -115,10 +129,10 @@ void receive(const MyMessage &message) {
     if (message.type == V_WATT) {
       pulseCounter = message.getLong();
       countReceived = true;
-     #ifdef MY_DEBUG
-      Serial.print("Received counter value:");
-      Serial.println(pulseCounter);
-     #endif
+      #ifdef MY_DEBUG
+        Serial.print("Received counter value:");
+        Serial.println(pulseCounter);
+      #endif
     }
   }
 }
@@ -126,14 +140,13 @@ void receive(const MyMessage &message) {
 void onPulse()
 {
   unsigned long currentPulseTime = millis();
-  // Litres per minute
+  // Litres per minute, one pulse = 10 dm3
   litresPerMinute = 60000.0 / (currentPulseTime - lastPulseTime) * 10;
   pulseCounter++;
   lastPulseTime = currentPulseTime;
-  //timer2m = millis();
- #ifdef MY_DEBUG
-  digitalWrite(LED_COUNTER_PIN, HIGH);
- #endif
+  #ifdef MY_DEBUG
+    digitalWrite(LED_COUNTER_PIN, HIGH);
+  #endif
 }
 
 uint16_t lastVolt = 0;
@@ -164,8 +177,8 @@ int getBatteryStatus(uint16_t& millivolt)
 {
   // Vlim = 5,177443609022556
   // Vpb (Vlim/1024) = 0,0050610396960142
-  #define VMIN 2.4 // Minimum voltage to regulator
-  #define VMAX 5.0 // 5.12788104 // Vmax = 5.131970260223048
+  #define VMIN 2.7 // Minimum voltage to regulator, on 8 MHz we can run down to 2.5V
+  #define VMAX 4.8 // 5.12788104 
    // get the battery Voltage
    int sensorValue = analogRead(A0);
    #ifdef MY_DEBUG
@@ -173,13 +186,12 @@ int getBatteryStatus(uint16_t& millivolt)
     Serial.println(sensorValue);
    #endif
    
-   // 1M, 470K divider across battery and using internal ADC ref of 1.1V
+   // 1M, 270K divider across battery and using internal ADC ref of 1.1V
    // Sense point is bypassed with 0.1 uF cap to reduce noise at that point
-   // ((1e6+470e3)/470e3)*1.1 = Vmax = 3.44 Volts
-   // 3.44/1023 = Volts per bit = 0.003363075
-   // Senzor #10: R1=985K, R2=269K
+   // ((1e6+270e3)/270e3)*1.1 = Vmax = 5.174074 Volts
+   // 5.174074/1023 = Volts per bit = 0.005057746
    // Vmax = 5,127881040892193, Vpb = 0,0050125914378223
-   float Vbat  = sensorValue * 0.005057746;  // Sensor #7: 0.0050165887;  // 1M + 270K
+   float Vbat  = sensorValue * 0.005057746;
    int batteryPcnt = static_cast<int>(((Vbat - VMIN) / (VMAX - VMIN)) * 100.);
    millivolt = (uint16_t)(Vbat * 1000.0);
 
