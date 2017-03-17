@@ -7,10 +7,10 @@
  *  Mounting pulse sensor on Gas meter:
  *  Place reed switch close to last digit on the mechanical counter. There is little magnet on disc in nuber 6 or 0.
  *  
- *  CONFIG: MYS bootloader, internal clock 8MHz.
+ *  CONFIG: MYSensors bootloader, internal clock 8MHz.
  */
 
-#define MY_DEBUG
+//#define MY_DEBUG
 #define MY_RADIO_NRF24
 #include <MySensors.h>
 
@@ -33,11 +33,12 @@ void setup()
 {
     analogReference(INTERNAL);
     request(CHILD_ID_PULSE_COUNTER, V_WATT);
-    pinMode(LED_COUNTER_PIN, OUTPUT);
-    digitalWrite(LED_COUNTER_PIN, HIGH);
-    wait(200);
-    digitalWrite(LED_COUNTER_PIN, LOW);
-
+    #ifdef MY_DEBUG
+      pinMode(LED_COUNTER_PIN, OUTPUT);
+      digitalWrite(LED_COUNTER_PIN, HIGH);
+      wait(200);
+      digitalWrite(LED_COUNTER_PIN, LOW);
+    #endif
     pinMode(GAS_SENSOR_PIN, INPUT);
     INT_PIN = digitalPinToInterrupt(GAS_SENSOR_PIN);
     attachInterrupt(INT_PIN, onPulse, RISING);
@@ -46,7 +47,7 @@ void setup()
 
 void presentation()
 {
-    sendSketchInfo("Gas meter sensor", "1.0");
+    sendSketchInfo("Gas meter sensor", "1.1");
     present(CHILD_ID_PULSE_COUNTER, S_POWER, "Pulse count");
     present(CHILD_ID_VOLTAGE, S_MULTIMETER, "Battery voltage");
 }
@@ -61,7 +62,7 @@ void loop()
 }
 
 #ifdef MY_DEBUG
-In debug mode, flash LED every incoming pulse
+// In debug mode, flash LED every incoming pulse
 unsigned long timer50ms = 0ul;
 void loop50ms()
 {
@@ -74,14 +75,19 @@ void loop50ms()
 }
 #endif
 
+float last_lpm = 0;
 unsigned long timer15s = 0ul;
 void loop15s()
 {
-  if (millis() - timer15s > 15000) {
+  // changed to 30s interval
+  if (millis() - timer15s > 30000) {
     timer15s = millis();
             
     if (countReceived == true) {
-      send(msgLitrePM.set(litresPerMinute, 2));
+      if (last_lpm != litresPerMinute) {
+        last_lpm = litresPerMinute;
+        send(msgLitrePM.set(litresPerMinute, 2));
+      }
     } else {
       request(CHILD_ID_PULSE_COUNTER, V_WATT);
     }
@@ -178,7 +184,7 @@ int getBatteryStatus(uint16_t& millivolt)
   // Vlim = 5,177443609022556
   // Vpb (Vlim/1024) = 0,0050610396960142
   #define VMIN 2.7 // Minimum voltage to regulator, on 8 MHz we can run down to 2.5V
-  #define VMAX 4.8 // 5.12788104 
+  #define VMAX 4.5 // 5.12788104 
    // get the battery Voltage
    int sensorValue = analogRead(A0);
    #ifdef MY_DEBUG
