@@ -183,8 +183,8 @@ int getBatteryStatus(uint16_t& millivolt)
 {
   // Vlim = 5,177443609022556
   // Vpb (Vlim/1024) = 0,0050610396960142
-  #define VMIN 2.7 // Minimum voltage to regulator, on 8 MHz we can run down to 2.5V
-  #define VMAX 4.5 // 5.12788104 
+  #define VMIN 3.6 // Minimum voltage to regulator, on 8 MHz we can go down to 2.4V
+  #define VMAX 5.1 // 5.12788104 
    // get the battery Voltage
    int sensorValue = analogRead(A0);
    #ifdef MY_DEBUG
@@ -193,7 +193,7 @@ int getBatteryStatus(uint16_t& millivolt)
    #endif
    
    // 1M, 270K divider across battery and using internal ADC ref of 1.1V
-   // Sense point is bypassed with 0.1 uF cap to reduce noise at that point
+   // Sense point is bypassed with 0.01 uF cap to reduce noise at that point
    // ((1e6+270e3)/270e3)*1.1 = Vmax = 5.174074 Volts
    // 5.174074/1023 = Volts per bit = 0.005057746
    // Vmax = 5,127881040892193, Vpb = 0,0050125914378223
@@ -201,6 +201,6 @@ int getBatteryStatus(uint16_t& millivolt)
    int batteryPcnt = static_cast<int>(((Vbat - VMIN) / (VMAX - VMIN)) * 100.);
    millivolt = (uint16_t)(Vbat * 1000.0);
 
-   return batteryPcnt;
+   return min(batteryPcnt, 100);
 }
 
