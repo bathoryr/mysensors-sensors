@@ -50,6 +50,24 @@
 			"args": ["-v", "${file}"],
 			"isTestCommand": true,
 			"showOutput": "always"
+		},
+		{
+			"taskName": "--pref",
+			"args": ["build.path=${fileDirname}", "--verify", "${file}"],
+			"isShellCommand": true,
+			"showOutput": "always",
+			"problemMatcher": {
+				"owner": "external",
+				"fileLocation": ["relative", "${fileDirname}"],
+				"pattern": {
+					"regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+					"file": 1,
+					"line": 2,
+					"column": 3,
+					"severity": 4,
+					"message": 5
+				}
+			}			
 		}	
 	]
 }

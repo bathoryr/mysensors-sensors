@@ -47,14 +47,14 @@ void loop()
   smartSleep(300000);
   // Approximates consumption - litres per minute, one pulse = 10 dm3
   float litresPerMinute = (pulseCounter - lastPC) / 5 * 10;
+  lastPC = pulseCounter;
   // Pulse counter has been changed by ISR, wait another 5 min
   if (countReceived) {
     send(msgLitrePM.set(litresPerMinute, 2));
-    send(msgPulseCount.set(pulseCounter));
+    send(msgPulseCount.set(lastPC));
   } else {
     request(CHILD_ID_PULSE_COUNTER, V_WATT);
   }
-  lastPC = pulseCounter;
   checkBattery();
 }
 
@@ -62,6 +62,7 @@ void receive(const MyMessage &message) {
   if (message.sensor == CHILD_ID_PULSE_COUNTER) {
     if (message.type == V_WATT) {
       pulseCounter = message.getLong();
+      lastPC = pulseCounter;
       countReceived = true;
       #ifdef MY_DEBUG
         Serial.print("Received counter value:");

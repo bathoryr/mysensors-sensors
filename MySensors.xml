@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MySensors>
+  <Application>
+    <Name>MYSController</Name>
+    <Version>1.0.0</Version>
+    <Timestamp>12/12/2017 14:52:10</Timestamp>
+    <Datamodel>1.0.0</Datamodel>
+  </Application>
+  <Nodes>
+    <Node>
+      <ID>0</ID>
+      <Sketch>Gateway</Sketch>
+      <Version></Version>
+      <Sensebender>0</Sensebender>
+      <MYSBootloader>0</MYSBootloader>
+      <Battery>0</Battery>
+      <BatteryLevel>255</BatteryLevel>
+      <LastSeen>12/12/2017 12:26:16</LastSeen>
+      <MessageCount>2</MessageCount>
+      <LastReboot>12/30/1899</LastReboot>
+      <BootloaderVersion>65535</BootloaderVersion>
+      <Sensors>
+        <Sensor>
+          <ID>255</ID>
+          <Type>18</Type>
+          <Description>2.2.0-beta</Description>
+          <LastSeen>12/12/2017 12:26:16</LastSeen>
+          <MessageCount>2</MessageCount>
+        </Sensor>
+      </Sensors>
+    </Node>
+    <Node>
+      <ID>255</ID>
+      <Sketch>Broadcast</Sketch>
+      <Version></Version>
+      <Sensebender>0</Sensebender>
+      <MYSBootloader>0</MYSBootloader>
+      <Battery>0</Battery>
+      <BatteryLevel>255</BatteryLevel>
+      <LastSeen>12/30/1899</LastSeen>
+      <MessageCount>0</MessageCount>
+      <LastReboot>12/30/1899</LastReboot>
+      <BootloaderVersion>65535</BootloaderVersion>
+      <Sensors/>
+    </Node>
+    <Node>
+      <ID>12</ID>
+      <Sketch>Energy Meter</Sketch>
+      <Version></Version>
+      <Sensebender>0</Sensebender>
+      <MYSBootloader>0</MYSBootloader>
+      <Battery>0</Battery>
+      <BatteryLevel>255</BatteryLevel>
+      <LastSeen>12/12/2017 14:52:04</LastSeen>
+      <MessageCount>923</MessageCount>
+      <LastReboot>12/12/2017 12:34:16</LastReboot>
+      <BootloaderVersion>65535</BootloaderVersion>
+      <Sensors>
+        <Sensor>
+          <ID>3</ID>
+          <Type>13</Type>
+          <Description>Power HI, instant</Description>
+          <LastSeen>12/12/2017 14:52:04</LastSeen>
+          <MessageCount>590</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>1</ID>
+          <Type>23</Type>
+          <Description>Pulse counters</Description>
+          <LastSeen>12/12/2017 14:51:58</LastSeen>
+          <MessageCount>149</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>2</ID>
+          <Type>0</Type>
+          <Description>HDO signal</Description>
+          <LastSeen>12/12/2017 14:51:58</LastSeen>
+          <MessageCount>147</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>4</ID>
+          <Type>13</Type>
+          <Description>Power LO</Description>
+          <LastSeen>12/12/2017 14:12:58</LastSeen>
+          <MessageCount>24</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>255</ID>
+          <Type>17</Type>
+          <Description>2.1.1</Description>
+          <LastSeen>12/12/2017 14:33:06</LastSeen>
+          <MessageCount>13</MessageCount>
+        </Sensor>
+      </Sensors>
+    </Node>
+    <Node>
+      <ID>5</ID>
+      <Sketch></Sketch>
+      <Version></Version>
+      <Sensebender>0</Sensebender>
+      <MYSBootloader>0</MYSBootloader>
+      <Battery>0</Battery>
+      <BatteryLevel>255</BatteryLevel>
+      <LastSeen>12/12/2017 14:51:12</LastSeen>
+      <MessageCount>304</MessageCount>
+      <LastReboot>12/30/1899</LastReboot>
+      <BootloaderVersion>65535</BootloaderVersion>
+      <Sensors>
+        <Sensor>
+          <ID>3</ID>
+          <Type>255</Type>
+          <Description></Description>
+          <LastSeen>12/12/2017 14:51:12</LastSeen>
+          <MessageCount>295</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>255</ID>
+          <Type>255</Type>
+          <Description></Description>
+          <LastSeen>12/12/2017 14:33:05</LastSeen>
+          <MessageCount>9</MessageCount>
+        </Sensor>
+      </Sensors>
+    </Node>
+    <Node>
+      <ID>3</ID>
+      <Sketch>BoilerTemp</Sketch>
+      <Version>0.5</Version>
+      <Sensebender>0</Sensebender>
+      <MYSBootloader>0</MYSBootloader>
+      <Battery>0</Battery>
+      <BatteryLevel>255</BatteryLevel>
+      <LastSeen>12/12/2017 14:51:30</LastSeen>
+      <MessageCount>175</MessageCount>
+      <LastReboot>12/12/2017 12:33:44</LastReboot>
+      <BootloaderVersion>65535</BootloaderVersion>
+      <Sensors>
+        <Sensor>
+          <ID>0</ID>
+          <Type>6</Type>
+          <Description>Boiler temp</Description>
+          <LastSeen>12/12/2017 14:51:30</LastSeen>
+          <MessageCount>68</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>3</ID>
+          <Type>3</Type>
+          <Description>Boiler heat</Description>
+          <LastSeen>12/12/2017 14:51:30</LastSeen>
+          <MessageCount>83</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>255</ID>
+          <Type>18</Type>
+          <Description>2.2.0-beta</Description>
+          <LastSeen>12/12/2017 14:50:06</LastSeen>
+          <MessageCount>23</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>4</ID>
+          <Type>6</Type>
+          <Description>Destination temp</Description>
+          <LastSeen>12/12/2017 12:33:44</LastSeen>
+          <MessageCount>1</MessageCount>
+        </Sensor>
+      </Sensors>
+    </Node>
+    <Node>
+      <ID>1</ID>
+      <Sketch>Humidity</Sketch>
+      <Version>0.8</Version>
+      <Sensebender>0</Sensebender>
+      <MYSBootloader>-1</MYSBootloader>
+      <Battery>-1</Battery>
+      <BatteryLevel>82</BatteryLevel>
+      <LastSeen>12/12/2017 14:51:43</LastSeen>
+      <MessageCount>183</MessageCount>
+      <LastReboot>12/12/2017 13:45:36</LastReboot>
+      <BootloaderVersion>65535</BootloaderVersion>
+      <Sensors>
+        <Sensor>
+          <ID>255</ID>
+          <Type>17</Type>
+          <Description>2.2.0-beta</Description>
+          <LastSeen>12/12/2017 14:51:43</LastSeen>
+          <MessageCount>148</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>2</ID>
+          <Type>30</Type>
+          <Description>Batt. voltage</Description>
+          <LastSeen>12/12/2017 14:39:59</LastSeen>
+          <MessageCount>10</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>1</ID>
+          <Type>6</Type>
+          <Description>Temperature</Description>
+          <LastSeen>12/12/2017 14:42:07</LastSeen>
+          <MessageCount>15</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>0</ID>
+          <Type>7</Type>
+          <Description>Humidity</Description>
+          <LastSeen>12/12/2017 14:33:35</LastSeen>
+          <MessageCount>8</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>3</ID>
+          <Type>3</Type>
+          <Description>Heating status</Description>
+          <LastSeen>12/12/2017 13:45:36</LastSeen>
+          <MessageCount>1</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>4</ID>
+          <Type>23</Type>
+          <Description>Set target temerature</Description>
+          <LastSeen>12/12/2017 13:45:36</LastSeen>
+          <MessageCount>1</MessageCount>
+        </Sensor>
+      </Sensors>
+    </Node>
+    <Node>
+      <ID>20</ID>
+      <Sketch>Gas meter sensor</Sketch>
+      <Version>2.0</Version>
+      <Sensebender>0</Sensebender>
+      <MYSBootloader>-1</MYSBootloader>
+      <Battery>0</Battery>
+      <BatteryLevel>84</BatteryLevel>
+      <LastSeen>12/12/2017 14:50:58</LastSeen>
+      <MessageCount>3418</MessageCount>
+      <LastReboot>12/12/2017 14:20:16</LastReboot>
+      <BootloaderVersion>513</BootloaderVersion>
+      <Sensors>
+        <Sensor>
+          <ID>1</ID>
+          <Type>13</Type>
+          <Description>Pulse count</Description>
+          <LastSeen>12/12/2017 14:50:58</LastSeen>
+          <MessageCount>82</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>255</ID>
+          <Type>17</Type>
+          <Description>2.2.0-beta</Description>
+          <LastSeen>12/12/2017 14:50:58</LastSeen>
+          <MessageCount>2852</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>2</ID>
+          <Type>30</Type>
+          <Description>Battery voltage</Description>
+          <LastSeen>12/12/2017 14:50:58</LastSeen>
+          <MessageCount>21</MessageCount>
+        </Sensor>
+      </Sensors>
+    </Node>
+    <Node>
+      <ID>14</ID>
+      <Sketch></Sketch>
+      <Version></Version>
+      <Sensebender>0</Sensebender>
+      <MYSBootloader>0</MYSBootloader>
+      <Battery>0</Battery>
+      <BatteryLevel>27</BatteryLevel>
+      <LastSeen>12/12/2017 14:41:48</LastSeen>
+      <MessageCount>13</MessageCount>
+      <LastReboot>12/30/1899</LastReboot>
+      <BootloaderVersion>65535</BootloaderVersion>
+      <Sensors>
+        <Sensor>
+          <ID>255</ID>
+          <Type>255</Type>
+          <Description></Description>
+          <LastSeen>12/12/2017 13:51:23</LastSeen>
+          <MessageCount>5</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>1</ID>
+          <Type>255</Type>
+          <Description></Description>
+          <LastSeen>12/12/2017 14:41:48</LastSeen>
+          <MessageCount>6</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>2</ID>
+          <Type>255</Type>
+          <Description></Description>
+          <LastSeen>12/12/2017 14:26:05</LastSeen>
+          <MessageCount>1</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>0</ID>
+          <Type>255</Type>
+          <Description></Description>
+          <LastSeen>12/12/2017 14:35:04</LastSeen>
+          <MessageCount>1</MessageCount>
+        </Sensor>
+      </Sensors>
+    </Node>
+    <Node>
+      <ID>11</ID>
+      <Sketch>Humidity</Sketch>
+      <Version>0.8</Version>
+      <Sensebender>0</Sensebender>
+      <MYSBootloader>-1</MYSBootloader>
+      <Battery>0</Battery>
+      <BatteryLevel>78</BatteryLevel>
+      <LastSeen>12/12/2017 14:52:01</LastSeen>
+      <MessageCount>296</MessageCount>
+      <LastReboot>12/12/2017 12:51:54</LastReboot>
+      <BootloaderVersion>513</BootloaderVersion>
+      <Sensors>
+        <Sensor>
+          <ID>255</ID>
+          <Type>17</Type>
+          <Description>2.2.0-beta</Description>
+          <LastSeen>12/12/2017 14:52:01</LastSeen>
+          <MessageCount>238</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>0</ID>
+          <Type>7</Type>
+          <Description>Humidity</Description>
+          <LastSeen>12/12/2017 14:52:01</LastSeen>
+          <MessageCount>19</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>2</ID>
+          <Type>30</Type>
+          <Description>Batt. voltage</Description>
+          <LastSeen>12/12/2017 14:49:51</LastSeen>
+          <MessageCount>9</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>3</ID>
+          <Type>3</Type>
+          <Description>Heating status</Description>
+          <LastSeen>12/12/2017 12:51:54</LastSeen>
+          <MessageCount>2</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>4</ID>
+          <Type>23</Type>
+          <Description>Set target temerature</Description>
+          <LastSeen>12/12/2017 12:56:14</LastSeen>
+          <MessageCount>6</MessageCount>
+        </Sensor>
+        <Sensor>
+          <ID>1</ID>
+          <Type>255</Type>
+          <Description></Description>
+          <LastSeen>12/12/2017 14:52:01</LastSeen>
+          <MessageCount>22</MessageCount>
+        </Sensor>
+      </Sensors>
+    </Node>
+    <Node>
+      <ID>2</ID>
+      <Sketch></Sketch>
+      <Version></Version>
+      <Sensebender>0</Sensebender>
+      <MYSBootloader>0</MYSBootloader>
+      <Battery>0</Battery>
+      <BatteryLevel>255</BatteryLevel>
+      <LastSeen>12/12/2017 14:13:06</LastSeen>
+      <MessageCount>3</MessageCount>
+      <LastReboot>12/30/1899</LastReboot>
+      <BootloaderVersion>65535</BootloaderVersion>
+      <Sensors>
+        <Sensor>
+          <ID>255</ID>
+          <Type>255</Type>
+          <Description></Description>
+          <LastSeen>12/12/2017 14:13:06</LastSeen>
+          <MessageCount>3</MessageCount>
+        </Sensor>
+      </Sensors>
+    </Node>
+  </Nodes>
+</MySensors>

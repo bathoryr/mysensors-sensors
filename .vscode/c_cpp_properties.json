@@ -26,7 +26,11 @@
                 "/opt/arduino/libraries",
                 "/home/radovan/Arduino/libraries",
                 "/home/radovan/src/MySensors",
-                "/home/radovan/.arduino15/packages/arduino/hardware/avr/1.6.18/cores/arduino"
+                "/home/radovan/.arduino15/packages/arduino/hardware/avr/1.6.18/cores/arduino",
+                "/home/radovan/.arduino15/packages/arduino/hardware/avr/1.6.18/variants/micro",
+                "/opt/arduino/hardware/tools/avr/lib/gcc/avr/4.9.2/include",
+                "/opt/arduino/hardware/tools/avr/avr/include",
+                "/usr/include/c++/6"
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": false,
