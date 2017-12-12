@@ -1,0 +1,5 @@
+{
+    "board": "Optiboot:avr:optiboot28",
+    "sketch": "BoilerTempRelay/BoilerTempRelay.ino",
+    "configuration": "mhz=8MHz,cpu=atmega328p"
+}

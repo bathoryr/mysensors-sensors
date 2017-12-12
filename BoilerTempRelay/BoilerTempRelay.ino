@@ -12,6 +12,8 @@
 #define MY_RX_MESSAGE_BUFFER_FEATURE
 #define MY_RX_MESSAGE_BUFFER_SIZE 8
 #define MY_RF24_IRQ_PIN 2
+// Prevent this repeater to connect to another repeater
+#define MY_PARENT_NODE_ID 0
 
 #include <MySensors.h>  
 #include <DallasTemperature.h>
@@ -60,8 +62,8 @@ void presentation()
 
   // Register all sensors to gw (they will be created as child devices)
   present(CHILD_ID_TEMP, S_TEMP, "Boiler temp");
-//  present(CHILD_ID_VOLTAGE, S_MULTIMETER);
-//  present(CHILD_ID_BOILER, S_BINARY, "Boiler led");
+  //  present(CHILD_ID_VOLTAGE, S_MULTIMETER);
+  //  present(CHILD_ID_BOILER, S_BINARY, "Boiler led");
   present(CHILD_ID_HEATING, S_BINARY, "Boiler heat");
   present(CHILD_ID_DEST_TEMP, S_TEMP, "Destination temp");
 }
@@ -140,4 +142,3 @@ void sendBoilerTemp()
       send(msgHeating.set(false));    
   }
 }
-

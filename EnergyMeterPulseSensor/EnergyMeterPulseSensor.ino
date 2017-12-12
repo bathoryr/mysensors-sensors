@@ -34,9 +34,9 @@ unsigned long oldWatt = 0L;
 volatile bool HDOState;
 bool LastHDOState;
 
-MyMessage wattMsg(CHILD_ID_POWER_HI,V_WATT);    // Instant consumption is only one
-MyMessage pcMsgHI(CHILD_ID_POWER_PULSE,V_VAR1);
-MyMessage pcMsgLO(CHILD_ID_POWER_PULSE,V_VAR2);
+MyMessage wattMsg(CHILD_ID_POWER_HI, V_WATT);    // Instant consumption is only one
+//MyMessage pcMsgHI(CHILD_ID_POWER_PULSE, V_VAR1);
+//MyMessage pcMsgLO(CHILD_ID_POWER_PULSE, V_VAR2);
 MyMessage HDOmsg(CHILD_ID_POWER_HDO, V_TRIPPED);
 
 void setup()  
@@ -45,7 +45,7 @@ void setup()
   request(CHILD_ID_POWER_PULSE, V_VAR1);    // HI
   request(CHILD_ID_POWER_PULSE, V_VAR2);    // LO
 
-  pinMode(POWER_SENSOR_PIN,INPUT_PULLUP);
+  pinMode(POWER_SENSOR_PIN, INPUT_PULLUP);
   pinMode(HDO_SENSOR_PIN, INPUT_PULLUP);
 
   attachInterrupt(digitalPinToInterrupt(POWER_SENSOR_PIN), onPulse, RISING);
@@ -55,13 +55,12 @@ void setup()
 
 void presentation() 
 {
-  sendSketchInfo("Energy Meter", "1.2");
+  sendSketchInfo("Energy Meter", "1.21");
 
-  present(CHILD_ID_POWER_HI, S_POWER, "Power HI, current");
+  present(CHILD_ID_POWER_HI, S_POWER, "Power HI, instant");
   present(CHILD_ID_POWER_LO, S_POWER, "Power LO");
   present(CHILD_ID_POWER_HDO, S_DOOR, "HDO signal");
-  present(CHILD_ID_POWER_PULSE, V_VAR1, "Pulse HI");
-  present(CHILD_ID_POWER_PULSE, V_VAR2, "Pulse LO");
+  present(CHILD_ID_POWER_PULSE, S_CUSTOM, "Pulse counters");
 }
 
 void loop()     
@@ -103,9 +102,10 @@ void SendPulse()
   if (pcReceivedHI) {
     if (pulseCountHI != oldPulseCountHI) {
       oldPulseCountHI = pulseCountHI;
+      MyMessage pcMsgHI(CHILD_ID_POWER_PULSE, V_VAR1);
       send(pcMsgHI.set(pulseCountHI));  // Send pulse count value to gw 
       if (kwhCounter % 5 == 0) {
-        MyMessage kwhMsgHI(CHILD_ID_POWER_HI,V_KWH);
+        MyMessage kwhMsgHI(CHILD_ID_POWER_HI, V_KWH);
         double kwh = (double)pulseCountHI / (double)PULSE_FACTOR;
         send(kwhMsgHI.set(kwh, 4));  // Send kwh value to gw 
       }
@@ -116,9 +116,10 @@ void SendPulse()
   if (pcReceivedLO) {
     if (pulseCountLO != oldPulseCountLO) {
       oldPulseCountLO = pulseCountLO;
+      MyMessage pcMsgLO(CHILD_ID_POWER_PULSE, V_VAR2);
       send(pcMsgLO.set(pulseCountLO));  // Send pulse count value
       if (kwhCounter % 5 == 0) {
-        MyMessage kwhMsgLO(CHILD_ID_POWER_LO,V_KWH);
+        MyMessage kwhMsgLO(CHILD_ID_POWER_LO, V_KWH);
         double kwh = (double)pulseCountLO / (double)PULSE_FACTOR;     
         send(kwhMsgLO.set(kwh, 4));  // Send kwh value
       }

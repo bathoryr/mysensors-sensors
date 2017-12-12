@@ -4,42 +4,30 @@
  * Remote control: Turn on light on by green button, when light is on, then second press turns off timeout
  *    Turn off by red button, when light is off turn off motion detection
  * When OpenHAB receive MoveDetectMsg - it should set/delete timer to turn light off
+ * Config: Arduino Nano + MYS bootloader
  */
-
-// If defined, set Living room sensor, otherwise set Pergola sensor
-#define LIVING_ROOM_SENSOR
 
 // Enable debug prints
 //#define MY_DEBUG
 
 // Enable and select radio type attached
 #define MY_RADIO_NRF24
-#ifdef LIVING_ROOM_SENSOR
-  // ID's of Remote control
-  const unsigned long RC_ID = 3507000;     // RC1 - Living room
-#else
-  #define MY_REPEATER_FEATURE
-  const unsigned long RC_ID = 11763000;    // RC2 - Pergola
-  // Is temperature sensor attached ?
-  #define TEMP_SENSOR_ATTACHED
-#endif
+//#define MY_REPEATER_FEATURE
+const unsigned long RC_ID = 11763000;    // RC2 - Pergola
 
-#include <SPI.h>
 #include <MySensors.h>  
 #include <RCSwitch.h>
 #include <BH1750.h>
 #include <Wire.h> 
-#ifdef TEMP_SENSOR_ATTACHED
-  #include <DallasTemperature.h>
-  #include <OneWire.h>
-  
-  OneWire oneWire(8); // Setup a oneWire instance to communicate with any OneWire devices
-  DallasTemperature TempSensors(&oneWire); // Pass the oneWire reference to Dallas Temperature. 
-  // arrays to hold device address
-  DeviceAddress TempDeviceAddress;
-  // RF 433 receiver
-  RCSwitch mySwitch = RCSwitch();
-#endif
+#include <DallasTemperature.h>
+#include <OneWire.h>
+
+OneWire oneWire(8); // Setup a oneWire instance to communicate with any OneWire devices
+DallasTemperature TempSensors(&oneWire); // Pass the oneWire reference to Dallas Temperature. 
+// arrays to hold device address
+DeviceAddress TempDeviceAddress;
+// RF 433 receiver
+RCSwitch mySwitch = RCSwitch();
 
 // Define RC button values
 enum RC_buttons {RC_PWR_OFF = 201, RC_PWR_ON = 204, RC_BRIGHT_UP = 205, RC_BRIGHT_DN = 206, 
@@ -73,10 +61,8 @@ uint16_t LastLightLevel;
 #define CHILD_ID_MOVE_DETECT 5
 #define CHILD_ID_TEMPERATUTE 6
 
-// V dřívějších verzích MYS byla chyba v inicializaci MyMessage,
-// proto bylo nutné objekty inicializovat tady. Už je to v MYS opravené.
 MyMessage switchMsg(CHILD_ID_LIGHT, V_STATUS);
-//MyMessage moveDetectMsg(CHILD_ID_MOVE_DETECT, V_VAR1);
+MyMessage moveDetectMsg(CHILD_ID_MOVE_DETECT, V_STATUS);
 MyMessage motionMsg(CHILD_ID_MOTION, V_TRIPPED);
 MyMessage lightMsg(CHILD_ID_LUX, V_LEVEL);
 MyMessage dimmerMsg(CHILD_ID_LIGHT, V_DIMMER);
@@ -95,48 +81,38 @@ void setup()
   pinMode(MOTION_LED, OUTPUT);
   pinMode(DIGITAL_INPUT_SENSOR, INPUT);     // Set the motion sensor digital pin as input
   lightSensor.begin();
- #ifndef LIVING_ROOM_SENSOR
   mySwitch.enableReceive(0);                // Receiver on inerrupt 0 => that is pin #2
- #endif
 
-  LastDimValue = 25; //loadState(EEPROM_DIMMER_LEVEL);
-  #ifdef TEMP_SENSOR_ATTACHED
-    // Startup up the OneWire library
-    TempSensors.begin();
-    if (!TempSensors.getAddress(TempDeviceAddress, 0))
-      Serial.println("Could not get DS18B20 device address!");
-    // set the resolution to 11 bit (Each Dallas/Maxim device is capable of 9 - 12 bit resolutions)
-    TempSensors.setResolution(TempDeviceAddress, 11);
-  #endif
+  // Startup up the OneWire library
+  TempSensors.begin();
+  TempSensors.getAddress(TempDeviceAddress, 0);
+  TempSensors.setResolution(TempDeviceAddress, 11);
   // Flash LED for startup indication
   for (int i = 0; i < 3; i++) {
     digitalWrite(MOTION_LED, HIGH);
-    delay(100);
+    wait(100);
     digitalWrite(MOTION_LED, LOW);
-    delay(200);
+    wait(200);
   } 
-  Serial.println("Node ready.");  
+  request(CHILD_ID_LIGHT, V_STATUS);
+  request(CHILD_ID_LIGHT, V_DIMMER);
+  request(CHILD_ID_MOVE_DETECT, V_STATUS);
 }
 
 void presentation() {
   // Send the Sketch Version Information to the Gateway
-  sendSketchInfo("Dimmable Light", "0.14");
+  sendSketchInfo("Dimmable Light", "0.9");
 
   present(CHILD_ID_LIGHT, S_DIMMER, "Light intensity");
   present(CHILD_ID_MOTION, S_MOTION, "Motion activity");
   present(CHILD_ID_LUX, S_LIGHT_LEVEL, "Illumination level");
-//  present(CHILD_ID_MOTION_TIMEOUT, S_CUSTOM);
-  present(CHILD_ID_MOVE_DETECT, S_CUSTOM, "Move detect act");
-  #ifdef TEMP_SENSOR_ATTACHED
-    present(CHILD_ID_TEMPERATUTE, S_TEMP, "Temperature");
-  #endif
+  present(CHILD_ID_MOVE_DETECT, S_BINARY, "Move detect act");
+  present(CHILD_ID_TEMPERATUTE, S_TEMP, "Temperature");
 }
 
 void loop()      
 {
- #ifndef LIVING_ROOM_SENSOR
   GetRCSwitch();
- #endif
   Loop1s();
   Loop5s();
   Loop60s();
@@ -180,9 +156,7 @@ void Loop60s()
     // Every minute send light level always
     LastLightLevel = 999;
     SendLightLevel();
-    #ifdef TEMP_SENSOR_ATTACHED
-      SendTemperature1();
-    #endif
+    SendTemperature1();
   }
 }
 
@@ -202,24 +176,6 @@ void SendLightLevel()
   }
 }
 
-bool SendMessage(MyMessage &msg)
-{
-  const int RETRY_COUNT = 3;
-  int retry = 0;
-  bool result;
-  while((result = send(msg)) == false || retry++ >= RETRY_COUNT) {
-    #ifdef MY_DEBUG
-    Serial.println("Error sending message, waiting for next request...");
-    #endif
-    wait(100);
-  }
-  if (retry > 1) {
-    RedLEDFlash(retry);
-  }
-  return result;
-}
-
-#ifdef TEMP_SENSOR_ATTACHED
 float LastTemp;
 void SendTemperature1() 
 {
@@ -234,7 +190,6 @@ void SendTemperature1()
     send(tempMsg.set(99.9, 1));
   }
 }
-#endif
 
 void SendDimValue(int dim)
 {
@@ -247,23 +202,13 @@ void SendDimValue(int dim)
       digitalWrite(LED_PIN, LOW);
       digitalWrite(OUTPUT_PIN, LOW);
       LastLightState = LIGHT_OFF;
-      SendMessage(switchMsg.set(false));
+      send(switchMsg.set(false));
     }
     //MyMessage dimmerMsg(CHILD_ID_LIGHT, V_DIMMER);
-    if (SendMessage(dimmerMsg.set(dim)) ) {
-      LastDimValue = dim;
-      #ifdef MY_DEBUG
-      Serial.print("Setting LastDimValue=");
-      Serial.println(LastDimValue);
-      #endif
-    }
-    else {
-      RedLEDFlash(3);
-    }
+    send(dimmerMsg.set(dim));
+    LastDimValue = dim;
   }
 }
-
-#if ndef LIVING_ROOM_SENSOR
 void GetRCSwitch()
 {
   if (mySwitch.available()) {
@@ -271,14 +216,6 @@ void GetRCSwitch()
     if (value != 0) {
       bool lightState = LastLightState;
       byte dimValue = LastDimValue;
-      #ifdef MY_DEBUG
-      Serial.print("Received ");
-      Serial.println(value);
-      Serial.print("LastLightState=");
-      Serial.println(LastLightState);
-      Serial.print("LastDimValue=");
-      Serial.println(LastDimValue);
-      #endif
       switch (value) {
         case RC_ID + RC_PWR_OFF:
           if (LastLightState == LIGHT_ON) {
@@ -287,16 +224,13 @@ void GetRCSwitch()
             EnableMotionDetect = true;
             digitalWrite(LED_PIN, LOW);
             digitalWrite(OUTPUT_PIN, LOW);
-            //send(switchMsg.set(false));   
-            // Try it more times until succeeded
-            SendMessage(switchMsg.set(false));
+            send(switchMsg.set(false));   
           } else {
             // Second button press when light is off - notify user
             EnableMotionDetect = false;
             RedLEDFlash(2);
           }
-          //send(moveDetectMsg.set(EnableMotionDetect));
-          SendMessage(moveDetectMsg.set(EnableMotionDetect));
+          send(moveDetectMsg.set(EnableMotionDetect));
           break;
         case RC_ID + RC_PWR_ON:
           if (LastLightState == LIGHT_OFF) {
@@ -305,15 +239,13 @@ void GetRCSwitch()
             EnableMotionDetect = true;
             analogWrite(LED_PIN, LastDimValue);
             analogWrite(OUTPUT_PIN, LastDimValue);
-            //send(switchMsg.set(true));
-            SendMessage(switchMsg.set(true));
+            send(switchMsg.set(true));
           } else {
             // Second button press when light is on - notify user - OpenHAB should cancel timer
             EnableMotionDetect = false;
             RedLEDFlash(2);
           }
-          //send(moveDetectMsg.set(EnableMotionDetect));
-          SendMessage(moveDetectMsg.set(EnableMotionDetect));
+          send(moveDetectMsg.set(EnableMotionDetect));
           break;
         case RC_ID + RC_BRIGHT_UP:
           dimValue = min(++dimValue, 100);
@@ -340,7 +272,6 @@ void GetRCSwitch()
     mySwitch.resetAvailable();
   }
 }
-#endif
 
 void receive(const MyMessage &message)
 {
@@ -350,42 +281,27 @@ void receive(const MyMessage &message)
     case CHILD_ID_LIGHT:
       if (message.type == V_STATUS) {
         // Message from light switch (ON/OFF)
-        bool lstate = message.getBool();
-        #ifdef MY_DEBUG
-        Serial.println( "V_LIGHT command received..." );
-        Serial.print("Setting value: ");
-        Serial.println(lstate);
-        #endif
-        SetCurrentState2Hardware(lstate, dimvalue);
+        lstate = message.getBool();
       }
       if (message.type == V_DIMMER) {
         // Message from dimmer (intensity 0 - 100)
         dimvalue = message.getInt();
         if ((dimvalue < 0) || (dimvalue > 100)) {
-          #ifdef MY_DEBUG
-          Serial.println( "V_DIMMER data invalid (should be 0..100)" );
-          #endif
           RedLEDFlash();
           dimvalue = 1;
         }
-        #ifdef MY_DEBUG
-        Serial.println( "V_DIMMER command received..." );  
-        Serial.print("Setting value: ");
-        Serial.println(dimvalue);
-        #endif
-        SetCurrentState2Hardware(lstate, dimvalue);
       }
+      SetCurrentState2Hardware(lstate, dimvalue);
       break;
     case CHILD_ID_MOVE_DETECT:
-      if (message.type == V_VAR1) {
+      if (message.type == V_STATUS) {
         // Command from OpenHAB - Enable/disable move detection 
         EnableMotionDetect = message.getBool();
         if (EnableMotionDetect == false) {
           // When message is received and the motion is active, deactivate motion indicator
+          send(motionMsg.set(false));
           LastTripped = false;
           digitalWrite(MOTION_LED, false);
-          //MyMessage motionMsg(CHILD_ID_MOTION, V_TRIPPED);
-          //send(motionMsg.set(false));
         }
       }
       break;
@@ -394,12 +310,6 @@ void receive(const MyMessage &message)
 
 void SetCurrentState2Hardware(bool lightState, byte dimValue)
 {
-  #ifdef MY_DEBUG
-  Serial.print("Light state: ");
-  Serial.print(lightState);
-  Serial.print(", light Level: ");
-  Serial.println(dimValue);
-  #endif
   if (lightState != LastLightState) {
     if (lightState == false) {
        digitalWrite(LED_PIN, LOW);
@@ -408,10 +318,6 @@ void SetCurrentState2Hardware(bool lightState, byte dimValue)
        int val = map(dimValue, 0, 100, 0, 255);
        analogWrite(LED_PIN, val);
        analogWrite(OUTPUT_PIN, val);
-       #ifdef MY_DEBUG
-       Serial.print(" - mapped to: ");
-       Serial.println(val);
-       #endif
     }
     LastLightState = lightState;
   }
@@ -420,10 +326,6 @@ void SetCurrentState2Hardware(bool lightState, byte dimValue)
        int val = map(dimValue, 0, 100, 0, 255);
        analogWrite(LED_PIN, val);
        analogWrite(OUTPUT_PIN, val);
-       #ifdef MY_DEBUG
-       Serial.print(" - mapped to: ");
-       Serial.println(val);
-       #endif      
     }
     LastDimValue = dimValue;
   }

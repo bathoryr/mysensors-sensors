@@ -14,6 +14,7 @@
 
 #include <MyConfig.h>
 #include <MySensors.h>  
+#include <SPI.h>
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
 #include <DHT_U.h>
@@ -34,18 +35,20 @@
 int BATTERY_SENSE_PIN = A0;  // select the input pin for the battery sense point
 
 const unsigned long SLEEP_TIME = 60000; // Sleep time between reads (in milliseconds)
-const byte HEARTBEAT = 10; // Heartbeat interval 10 minutes (SLEEP_TIME cycles)
-unsigned int heartbeatCounter = 0;
+const byte HEARTBEAT = 10;              // Heartbeat interval 10 minutes (SLEEP_TIME cycles)
+byte heartbeatCounter = 0;
+const byte REQUEST_RETRY = 5;           // Number of retries to request values from cocntroller
+byte request_attempt = 0;
 
 DHT_Unified dht(DHT_PIN, DHT22);
 
 float lastTemp;
 int lastHum;
 uint16_t lastVolt;
-int oldBatteryPcnt = 0;
+byte oldBatteryPcnt = 0;
 byte batteryPcnt;
 bool heatingState = false;
-float heatTargetTemp = 0;
+float heatTargetTemp = NAN;
 
 
 #ifdef USING_DISPLAY
@@ -59,10 +62,13 @@ float heatTargetTemp = 0;
   Adafruit_PCD8544 display = Adafruit_PCD8544(6, 5, 4, 0);
 #endif
 
+void displayOnDisplay(float temp = NAN, int hum = NAN);
+
 void setup()  
 { 
   dht.begin();
   #ifdef USING_DISPLAY
+    SPI.begin();
     // Init display
     display.begin();
     display.setContrast(50);
@@ -72,12 +78,13 @@ void setup()
   analogReference(INTERNAL);
   request(CHILD_ID_HEAT, V_STATUS);
   request(CHILD_ID_TARGETTEMP, V_VAR1);
+  wait(500);
 }
 
 void presentation()  
 { 
   // Send the Sketch Version Information to the Gateway
-  sendSketchInfo("Humidity", "0.7");
+  sendSketchInfo("Humidity", "0.8");
 
   // Register all sensors to gw (they will be created as child devices)
   present(CHILD_ID_HUM, S_HUM, "Humidity");
@@ -90,25 +97,35 @@ void presentation()
 void loop()      
 {  
   if (heartbeatCounter++ % HEARTBEAT == 0) {
-    batteryPcnt = checkBattery();
+    checkBattery();
   }
   
   // Fetch temperatures from DHT sensor
-  sensors_event_t event;  
-  dht.temperature().getEvent(&event);
+  sensors_event_t event;
+  byte rdcount = 0;
+  do {
+    if (rdcount > 0)
+      wait(200);
+    dht.temperature().getEvent(&event);
+  } while (isnan(event.temperature) && rdcount++ < 3);
   if (!isnan(event.temperature)) {
-    float temperature = event.temperature;
-    if (temperature != lastTemp) {
-      lastTemp = temperature;
+    if (event.temperature != lastTemp) {
+      lastTemp = event.temperature;
       MyMessage msgTemp(CHILD_ID_TEMP, V_TEMP);
-      send(msgTemp.set(temperature, 1));
+      send(msgTemp.set(event.temperature, 1));
       #ifdef MY_DEBUG
         Serial.print("T: ");
-        Serial.println(temperature);
+        Serial.println(event.temperature);
       #endif
     }
-    // Fetch humidity from DHT sensor
-    dht.humidity().getEvent(&event);
+  } else {
+    #ifdef MY_DEBUG
+      Serial.println("Failed reading temperature from DHT.");
+    #endif
+  }
+  // Fetch humidity from DHT sensor
+  dht.humidity().getEvent(&event);
+  if (!isnan(event.relative_humidity)) {
     int humidity = (int)event.relative_humidity;
     if (humidity != lastHum) {
       lastHum = humidity;
@@ -119,33 +136,40 @@ void loop()
         Serial.println(humidity);
       #endif
     }
-    #ifdef USING_DISPLAY
-      displayOnDisplay();
-    #endif
   } else {
-    #ifdef USING_DISPLAY
-      display.clearDisplay();
-      display.print("DHT error.");
-      display.display();
-    #endif
     #ifdef MY_DEBUG
       Serial.println("Failed reading temperature from DHT.");
     #endif
+  }
+  #ifdef USING_DISPLAY
+    displayOnDisplay(event.temperature, event.relative_humidity);
+  #endif
+  if (isnan(heatTargetTemp) && request_attempt < REQUEST_RETRY) {
+    request(CHILD_ID_TARGETTEMP, V_VAR1);
+    wait(500);
+    request_attempt++;
   }
   smartSleep(SLEEP_TIME); //sleep a bit
 }
 
 #ifdef USING_DISPLAY
-void displayOnDisplay()
+void displayOnDisplay(float temp, int hum)
 {
   display.clearDisplay();
   display.setFont(&FreeSansBold9pt7b);
+  // First line
   display.setCursor(0, 12);
   display.print(lastTemp, 1);
+  if (isnan(temp)) {
+    display.print("!");
+  }
   display.print(" *C");
   // Second line
   display.setCursor(0, 30);
   display.print(lastHum, 1);
+  if (isnan(hum)) {
+    display.print("!");
+  }
   display.print(" %");
   // Heating symbol
   display.setCursor(70, 30);
@@ -182,7 +206,7 @@ void receive(const MyMessage& message)
         Serial.println(heatingState);
       #endif
       #ifdef USING_DISPLAY
-        displayOnDisplay();
+        displayOnDisplay(lastTemp, lastHum);
       #endif
     }
   }
@@ -194,7 +218,7 @@ void receive(const MyMessage& message)
         Serial.println(heatTargetTemp);
       #endif
       #ifdef USING_DISPLAY
-        displayOnDisplay();
+        displayOnDisplay(lastTemp, lastHum);
       #endif
     }
   }
@@ -241,7 +265,7 @@ int getBatteryStatus(uint16_t& millivolt)
   // Vlim = 5,177443609022556
   // Vpb (Vlim/1024) = 0,0050610396960142
   #define VMIN 3.3 // Minimum voltage to regulator
-  #define VMAX 5.1 // 5.12788104 // Vmax = 5.131970260223048
+  #define VMAX 4.5 // 5.12788104 // Vmax = 5.131970260223048
    // get the battery Voltage
    int sensorValue = analogRead(BATTERY_SENSE_PIN);
    #ifdef MY_DEBUG

@@ -103,7 +103,7 @@ void loop2m()
       litresPerMinute = 0;
       send(msgLitrePM.set(litresPerMinute, 2));
       #ifdef MY_DEBUG
-        Serial.println("No pulse chage for 2 min, going to sleep");
+        Serial.println("No pulse change for 2 min, going to sleep");
       #endif
       if (smartSleep(INT_PIN, RISING, 300000) < 0) {
         // No event received, sleep immediately again - no timer reset
@@ -183,7 +183,7 @@ int getBatteryStatus(uint16_t& millivolt)
 {
   // Vlim = 5,177443609022556
   // Vpb (Vlim/1024) = 0,0050610396960142
-  #define VMIN 3.6 // Minimum voltage to regulator, on 8 MHz we can go down to 2.4V
+  #define VMIN 3.5 // Minimum voltage to regulator, on 8 MHz we can go down to 2.4V
   #define VMAX 5.1 // 5.12788104 
    // get the battery Voltage
    int sensorValue = analogRead(A0);
