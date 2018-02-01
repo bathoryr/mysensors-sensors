@@ -1,15 +1,19 @@
 // MYSBL, 16MHz XTal
 
 #define MY_RADIO_NRF24
+#define MY_DISABLED_SERIAL
 //#define MY_REPEATER_FEATURE
 //#define MY_DEBUG
-
 #include <MySensors.h>
 #include <MyConfig.h>
 #include <RCSwitch.h>
 
 #define PIN_INT_LED 3
 #define PIN_LIGHT   4
+
+#define CHILD_ID_DIMMER 1
+#define CHILD_ID_LIGHT  2
+#define NODE_LIVROOM_DIMMER 5
 
 // ID's of Remote control
 const unsigned long RC_ID = 3507000;     // RC1 - Living room
@@ -22,29 +26,24 @@ enum RC_buttons {RC_PWR_OFF = 201, RC_PWR_ON = 204, RC_BRIGHT_UP = 205, RC_BRIGH
 RCSwitch mySwitch = RCSwitch();
 
 void setup() {
-  pinMode(PIN_INT_LED, OUTPUT);
   pinMode(PIN_LIGHT, OUTPUT);
   mySwitch.enableReceive(0);                // Receiver on inerrupt 0 => that is pin #
-
-  Serial.println("Setup OK");
+#ifdef MY_DEBUG
+  pinMode(PIN_INT_LED, OUTPUT);
   for (byte i = 0; i++; i < 5) {
     digitalWrite(PIN_INT_LED, HIGH);
     delay(200);
     digitalWrite(PIN_INT_LED, LOW);
     delay(200);
   }
+#endif
 }
 
-#define CHILD_ID_DIMMER 1
-#define CHILD_ID_LIGHT  2
-#define NODE_LIVROOM_DIMMER 5
-
-MyMessage msgDimmer(CHILD_ID_DIMMER, V_PERCENTAGE);
-MyMessage msgDimmerSw(CHILD_ID_DIMMER, V_STATUS);
+//MyMessage msgDimmer(CHILD_ID_DIMMER, V_PERCENTAGE);
 MyMessage msgLight(CHILD_ID_LIGHT, V_STATUS);
 
 void presentation() {
-  sendSketchInfo("Kid's light", "0.2");
+  sendSketchInfo("Kid's light", "1.0.0");
   present(CHILD_ID_DIMMER, S_DIMMER, "Main light intensity");
   present(CHILD_ID_DIMMER, S_LIGHT, "Main light switch");
   present(CHILD_ID_LIGHT, S_LIGHT, "Light switch");
@@ -54,12 +53,12 @@ void loop() {
   GetRCSwitch();
   wait(200);
 
-  /*
+#ifdef MY_DEBUG
   if (digitalRead(PIN_INT_LED) == LOW) 
     delayHIGH();
   else
     delayLOW();
-  */
+#endif
 }
 
 void receive(const MyMessage& message)
@@ -85,14 +84,22 @@ void GetRCSwitch()
       #endif
       switch (value) {
         case RC_ID + RC_PWR_OFF:
-          send(msgDimmerSw.set(0));
+        {
+          MyMessage msg(CHILD_ID_DIMMER, V_STATUS);
+          msg.setDestination(NODE_LIVROOM_DIMMER);
+          send(msg.set(false), true);
           break;
+        }
         case RC_ID + RC_PWR_ON:
-          send(msgDimmerSw.set(1));
+        {
+          MyMessage msg(CHILD_ID_DIMMER, V_STATUS);
+          msg.setDestination(NODE_LIVROOM_DIMMER);
+          send(msg.set(true), true);
           break;
+        }
         case RC_ID + RC_PCNT100:
         {
-          send(msgDimmer.set(100));
+          //send(msgDimmer.set(100));
           MyMessage msg(CHILD_ID_DIMMER, V_PERCENTAGE);
           msg.setDestination(NODE_LIVROOM_DIMMER);
           send(msg.set(100));
@@ -100,7 +107,7 @@ void GetRCSwitch()
         }
         case RC_ID + RC_PCNT50:
         {
-          send(msgDimmer.set(50));
+          //send(msgDimmer.set(50));
           MyMessage msg(CHILD_ID_DIMMER, V_PERCENTAGE);
           msg.setDestination(NODE_LIVROOM_DIMMER);
           send(msg.set(50));
@@ -108,7 +115,7 @@ void GetRCSwitch()
         }
         case RC_ID + RC_PCNT25:
         {
-          send(msgDimmer.set(25));
+          //send(msgDimmer.set(25));
           MyMessage msg(CHILD_ID_DIMMER, V_PERCENTAGE);
           msg.setDestination(NODE_LIVROOM_DIMMER);
           send(msg.set(25));
@@ -128,7 +135,7 @@ void GetRCSwitch()
     digitalWrite(PIN_INT_LED, LOW);
   }
 }
-
+#ifdef MY_DEBUG
 unsigned long timer1 = 0L;
 void delayHIGH() {
   if (millis() - timer1 > 5000) {
@@ -143,4 +150,4 @@ void delayLOW() {
     timer1 = millis();
   }
 }
-
+#endif

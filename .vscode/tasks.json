@@ -54,6 +54,7 @@
 		{
 			"taskName": "--pref",
 			"args": ["build.path=${fileDirname}", "--verify", "${file}"],
+			"isBuildCommand": true,
 			"isShellCommand": true,
 			"showOutput": "always",
 			"problemMatcher": {

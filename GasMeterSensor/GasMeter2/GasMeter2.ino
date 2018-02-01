@@ -11,6 +11,7 @@
 
 //#define MY_DEBUG
 #define MY_RADIO_NRF24
+#define MY_DISABLED_SERIAL
 #include <MySensors.h>
 
 #define GAS_SENSOR_PIN  2
@@ -37,21 +38,30 @@ void setup()
 
 void presentation()
 {
-  sendSketchInfo("Gas meter sensor", "2.0");
+  sendSketchInfo("Gas meter sensor", "2.0.1");
   present(CHILD_ID_PULSE_COUNTER, S_POWER, "Pulse count");
   present(CHILD_ID_VOLTAGE, S_MULTIMETER, "Battery voltage");
 }
 
+float prevLitres = 0.0;
+unsigned long prevPulses = 0ul;
+
 void loop()
 {
   smartSleep(300000);
-  // Approximates consumption - litres per minute, one pulse = 10 dm3
-  float litresPerMinute = (pulseCounter - lastPC) / 5 * 10;
+  // Approximate consumption - litres per minute, one pulse = 10 dm3
+  float litresPerMinute = (pulseCounter - lastPC) / .5;
   lastPC = pulseCounter;
   // Pulse counter has been changed by ISR, wait another 5 min
   if (countReceived) {
-    send(msgLitrePM.set(litresPerMinute, 2));
-    send(msgPulseCount.set(lastPC));
+    if (litresPerMinute != prevLitres) {
+      send(msgLitrePM.set(litresPerMinute, 2));
+      prevLitres = litresPerMinute;
+    }
+    if (lastPC != prevPulses) {
+      send(msgPulseCount.set((uint32_t)lastPC));
+      prevPulses = lastPC;
+    }
   } else {
     request(CHILD_ID_PULSE_COUNTER, V_WATT);
   }
@@ -86,7 +96,7 @@ void checkBattery()
   // get the battery Voltage
   uint16_t volt;
   byte batteryPcnt = getBatteryStatus(volt);
-  if (lastVolt != volt) {
+  if (lastVolt / 100 != volt / 100) {
     // Power up radio after sleep
     MyMessage msgVolt(CHILD_ID_VOLTAGE, V_VOLTAGE);
     send(msgVolt.set(volt));
@@ -108,7 +118,7 @@ int getBatteryStatus(uint16_t& millivolt)
 {
   // Vlim = 5,177443609022556
   // Vpb (Vlim/1024) = 0,0050610396960142
-  #define VMIN 3.5 // Minimum voltage to regulator, on 8 MHz we can go down to 2.4V
+  #define VMIN 3.0 // Minimum voltage to regulator, on 8 MHz we can go down to 2.4V
   #define VMAX 5.1 // 5.12788104 
    // get the battery Voltage
    int sensorValue = analogRead(A0);

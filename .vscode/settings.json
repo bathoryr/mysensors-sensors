@@ -1,6 +1,8 @@
 {
     "files.associations": {
-        "cmath": "cpp"
+        "cmath": "cpp",
+        "bitset": "cpp",
+        "cstdlib": "cpp"
     },
     "C_Cpp.intelliSenseEngineFallback": "Disabled"
 }

@@ -8,7 +8,7 @@
 
 // Enable and select radio type attached
 #define MY_RADIO_NRF24
-
+#define MY_DISABLED_SERIAL
 // NK5110 display is connected
 #define USING_DISPLAY 
 
@@ -76,7 +76,7 @@ void setup()
   #endif
 
   analogReference(INTERNAL);
-  request(CHILD_ID_HEAT, V_STATUS);
+  requsest(CHILD_ID_HEAT, V_STATUS);
   request(CHILD_ID_TARGETTEMP, V_VAR1);
   wait(500);
 }
@@ -84,7 +84,7 @@ void setup()
 void presentation()  
 { 
   // Send the Sketch Version Information to the Gateway
-  sendSketchInfo("Humidity", "0.8");
+  sendSketchInfo("Humidity", "1.0.0");
 
   // Register all sensors to gw (they will be created as child devices)
   present(CHILD_ID_HUM, S_HUM, "Humidity");
