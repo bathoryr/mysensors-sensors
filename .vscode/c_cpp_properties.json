@@ -32,7 +32,11 @@
                 "/opt/arduino/hardware/tools/avr/avr/include",
                 "/usr/include/c++/6",
                 "/home/radovan/Arduino/libraries/MySensosrs",
-                "/home/radovan/Arduino/libraries/rc-switch"
+                "/home/radovan/Arduino/libraries/rc-switch",
+                "/home/radovan/.arduino15/packages/esp8266/hardware/esp8266/2.4.0/cores/esp8266",
+                "/home/radovan/.arduino15/packages/esp8266/hardware/esp8266/2.4.0/libraries/ESP8266WiFi/src",
+                "/home/radovan/Arduino/libraries/PubSubClient/src",
+                "/home/radovan/.arduino15/packages/arduino/hardware/avr/1.6.21/cores/arduino"
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": false,
@@ -42,7 +46,9 @@
                     "/opt/arduino/libraries",
                     "/home/radovan/Arduino/libraries",
                     "${workspaceRoot}",
-                    "/home/radovan/.arduino15/packages/arduino/hardware/avr/1.6.18/cores/arduino"
+                    "/home/radovan/.arduino15/packages/arduino/hardware/avr/1.6.18/cores/arduino",
+                    "/home/radovan/.arduino15/packages/esp8266/hardware/esp8266/2.4.0/cores/esp8266",
+                    "/home/radovan/.arduino15/packages/arduino/hardware/avr/1.6.21/cores/arduino"
                 ]
             },
             "intelliSenseMode": "clang-x64"

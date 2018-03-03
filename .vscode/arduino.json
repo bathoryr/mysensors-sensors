@@ -1,6 +1,6 @@
 {
-    "board": "Optiboot:avr:optiboot28",
+    "board": "arduino:avr:nano",
     "sketch": "BoilerTempRelay/BoilerTempRelay.ino",
-    "configuration": "mhz=1MHz,cpu=atmega328p",
-    "port": "/dev/ttyUSB0"
+    "configuration": "cpu=atmega328",
+    "port": "/dev/ttyACM0"
 }
