@@ -10,7 +10,8 @@
 #define LIVING_ROOM_SENSOR
 
 // Enable debug prints
-//#define MY_DEBUG
+#define MY_DEBUG
+#define MY_DEBUG_VERBOSE_RF24
 
 // Enable and select radio type attached
 #define MY_RADIO_NRF24
