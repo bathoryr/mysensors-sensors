@@ -8,13 +8,14 @@
 
 // Enable and select radio type attached
 #define MY_RADIO_NRF24
-#define MY_REPEATER_FEATURE
+//#define MY_REPEATER_FEATURE
 #define MY_RX_MESSAGE_BUFFER_FEATURE
 #define MY_RX_MESSAGE_BUFFER_SIZE 8
 #define MY_RF24_IRQ_PIN 2
 // Prevent this repeater to connect to another repeater
-#define MY_PARENT_NODE_ID 0
+//#define MY_PARENT_NODE_ID 0
 
+#include <MyConfig.h>
 #include <MySensors.h>  
 #include <DallasTemperature.h>
 #include <OneWire.h>

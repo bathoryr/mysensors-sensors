@@ -8,7 +8,7 @@
 
 // Enable and select radio type attached
 #define MY_RADIO_NRF24
-
+#include <MyConfig.h>
 #include <MySensors.h>  
 
 #define POWER_SENSOR_PIN 2      // Power sensor
@@ -82,16 +82,16 @@ void loop15s()
     timerPower = millis();
     // New watt value has been calculated  
     if (watt != oldWatt) {
+      oldWatt = watt;  
       // Check that we dont get unresonable large watt value. 
       // could hapen when long wraps or false interrupt triggered
       if (watt < ((unsigned long)MAX_WATT)) {
-        send(wattMsg.set(watt));
+        send(wattMsg.set((uint32_t)oldWatt));
       }  
     #ifdef MY_DEBUG
       Serial.print("Watt:");
       Serial.println(watt);
     #endif
-      oldWatt = watt;  
     }
   }
 }
@@ -103,7 +103,7 @@ void SendPulse()
     if (pulseCountHI != oldPulseCountHI) {
       oldPulseCountHI = pulseCountHI;
       MyMessage pcMsgHI(CHILD_ID_POWER_PULSE, V_VAR1);
-      send(pcMsgHI.set(pulseCountHI));  // Send pulse count value to gw 
+      send(pcMsgHI.set((uint32_t)pulseCountHI));  // Send pulse count value to gw 
       if (kwhCounter % 5 == 0) {
         MyMessage kwhMsgHI(CHILD_ID_POWER_HI, V_KWH);
         double kwh = (double)pulseCountHI / (double)PULSE_FACTOR;
@@ -117,7 +117,7 @@ void SendPulse()
     if (pulseCountLO != oldPulseCountLO) {
       oldPulseCountLO = pulseCountLO;
       MyMessage pcMsgLO(CHILD_ID_POWER_PULSE, V_VAR2);
-      send(pcMsgLO.set(pulseCountLO));  // Send pulse count value
+      send(pcMsgLO.set((uint32_t)pulseCountLO));  // Send pulse count value
       if (kwhCounter % 5 == 0) {
         MyMessage kwhMsgLO(CHILD_ID_POWER_LO, V_KWH);
         double kwh = (double)pulseCountLO / (double)PULSE_FACTOR;     

@@ -32,7 +32,8 @@
                 "/usr/include/c++/6",
                 "/home/radovan/.arduino15/packages/esp8266/hardware/esp8266/2.4.0/cores/esp8266",
                 "/home/radovan/.arduino15/packages/esp8266/hardware/esp8266/2.4.0/libraries/ESP8266WiFi/src",
-                "/home/radovan/.arduino15/packages/arduino/hardware/avr/1.6.21/cores/arduino"
+                "/home/radovan/.arduino15/packages/arduino/hardware/avr/1.6.21/cores/arduino",
+                "/home/radovan/Arduino/libraries/MySensosrs"
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": false,
@@ -47,7 +48,10 @@
                     "/home/radovan/.arduino15/packages/arduino/hardware/avr/1.6.21/cores/arduino"
                 ]
             },
-            "intelliSenseMode": "clang-x64"
+            "intelliSenseMode": "clang-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
         },
         {
             "name": "Win32",

@@ -101,9 +101,9 @@ class Light {
         lightLevels->add(GetIlluminationLevel());
         digitalWrite(MOTION_LED, MotionDetected() ? HIGH : LOW);
         if (IsLightOn()) {
-            //if (TimerExpired()) {
-            //    TurnOff();
-            //}
+            if (TimerExpired()) {
+                TurnOff();
+            }
             // Need to set darkness level higher, because of light from LED
             if (MotionDetected() && IsDarkness(80)) {
                 ResetTimer();
