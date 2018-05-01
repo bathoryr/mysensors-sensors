@@ -1,2 +1,5 @@
-/**/*.hex
-/**/build/
+# Arduino compiled files
+*.hex
+
+# Visual Studio Code build directory
+**/build/
