@@ -1,2 +1,9 @@
+# Ignore compiled files
 *.hex
-build/
+
+# Visual Studio Code directory
+**/build/
+
+# Visual Studio directories
+**/Release/
+**/Debug/

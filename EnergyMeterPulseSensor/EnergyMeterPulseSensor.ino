@@ -3,6 +3,8 @@
  * Compile with MYSBootloader, XTAL, 16MHz
  * Based on EnergyMeter MySensors example
  */
+
+#include <MyConfig.h>
 // Enable debug prints
 //#define MY_DEBUG
 
@@ -82,16 +84,16 @@ void loop15s()
     timerPower = millis();
     // New watt value has been calculated  
     if (watt != oldWatt) {
+      oldWatt = watt;  
       // Check that we dont get unresonable large watt value. 
       // could hapen when long wraps or false interrupt triggered
       if (watt < ((unsigned long)MAX_WATT)) {
-        send(wattMsg.set(watt));
+        send(wattMsg.set(oldWatt));
       }  
     #ifdef MY_DEBUG
       Serial.print("Watt:");
       Serial.println(watt);
     #endif
-      oldWatt = watt;  
     }
   }
 }
@@ -103,7 +105,7 @@ void SendPulse()
     if (pulseCountHI != oldPulseCountHI) {
       oldPulseCountHI = pulseCountHI;
       MyMessage pcMsgHI(CHILD_ID_POWER_PULSE, V_VAR1);
-      send(pcMsgHI.set(pulseCountHI));  // Send pulse count value to gw 
+      send(pcMsgHI.set(oldPulseCountHI));  // Send pulse count value to gw 
       if (kwhCounter % 5 == 0) {
         MyMessage kwhMsgHI(CHILD_ID_POWER_HI, V_KWH);
         double kwh = (double)pulseCountHI / (double)PULSE_FACTOR;
@@ -117,7 +119,7 @@ void SendPulse()
     if (pulseCountLO != oldPulseCountLO) {
       oldPulseCountLO = pulseCountLO;
       MyMessage pcMsgLO(CHILD_ID_POWER_PULSE, V_VAR2);
-      send(pcMsgLO.set(pulseCountLO));  // Send pulse count value
+      send(pcMsgLO.set(oldPulseCountLO));  // Send pulse count value
       if (kwhCounter % 5 == 0) {
         MyMessage kwhMsgLO(CHILD_ID_POWER_LO, V_KWH);
         double kwh = (double)pulseCountLO / (double)PULSE_FACTOR;     

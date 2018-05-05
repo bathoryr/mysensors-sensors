@@ -1,6 +1,5 @@
 /*
  *  This sketch sends a message to a TCP server
- *
  */
 
 #include <ESP8266WiFi.h>
