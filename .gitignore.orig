@@ -1,0 +1,22 @@
+<<<<<<< HEAD
+# Ignore compiled files
+*.hex
+
+# Visual Studio Code directory
+build/
+
+# Visual Studio directories
+Release/
+Debug/
+*.suo
+
+# Visual Micro directory
+__vm/
+
+=======
+# Arduino compiled files
+*.hex
+
+# Visual Studio Code build directory
+**/build/
+>>>>>>> refs/remotes/origin/master

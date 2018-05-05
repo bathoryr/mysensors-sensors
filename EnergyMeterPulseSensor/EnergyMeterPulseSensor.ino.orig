@@ -10,6 +10,7 @@
 
 // Enable and select radio type attached
 #define MY_RADIO_NRF24
+#include <MyConfig.h>
 #include <MySensors.h>  
 
 #define POWER_SENSOR_PIN 2      // Power sensor
@@ -88,6 +89,7 @@ void loop15s()
       // could hapen when long wraps or false interrupt triggered
       if (watt < ((unsigned long)MAX_WATT)) {
 <<<<<<< HEAD
+        send(wattMsg.set(oldWatt));
 =======
         send(wattMsg.set((uint32_t)oldWatt));
 >>>>>>> refs/remotes/origin/master
@@ -108,6 +110,7 @@ void SendPulse()
       oldPulseCountHI = pulseCountHI;
       MyMessage pcMsgHI(CHILD_ID_POWER_PULSE, V_VAR1);
 <<<<<<< HEAD
+      send(pcMsgHI.set(oldPulseCountHI));  // Send pulse count value to gw 
 =======
       send(pcMsgHI.set((uint32_t)pulseCountHI));  // Send pulse count value to gw 
 >>>>>>> refs/remotes/origin/master
@@ -125,6 +128,7 @@ void SendPulse()
       oldPulseCountLO = pulseCountLO;
       MyMessage pcMsgLO(CHILD_ID_POWER_PULSE, V_VAR2);
 <<<<<<< HEAD
+      send(pcMsgLO.set(oldPulseCountLO));  // Send pulse count value
 =======
       send(pcMsgLO.set((uint32_t)pulseCountLO));  // Send pulse count value
 >>>>>>> refs/remotes/origin/master
