@@ -2,8 +2,13 @@
 *.hex
 
 # Visual Studio Code directory
-**/build/
+build/
 
 # Visual Studio directories
-**/Release/
-**/Debug/
+Release/
+Debug/
+*.suo
+
+# Visual Micro directory
+__vm/
+
